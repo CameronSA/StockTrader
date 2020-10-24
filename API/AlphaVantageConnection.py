@@ -18,6 +18,9 @@ class StockTimeSeries(Credentials):
         __response = requests.get(url)
         __dict = __response.json()[time_series_key]
         __df = pd.DataFrame.from_dict(__dict).transpose()
+        for col in __df.columns:
+            __df[col] = pd.to_numeric(__df[col], errors='coerce')
+
         __df['timestamp'] = pd.to_datetime(__df.index, format='%Y-%m-%d %H:%M:%S')
         __df = __df.sort_values('timestamp')
         return __df
