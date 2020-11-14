@@ -80,6 +80,42 @@ class BollingerPlot:
         plt.show()
 
 
+class RSIPlot:
+    def __init__(self, dataframe, close_col, rsi_col, title):
+        df = pd.DataFrame()
+        df['Close'] = dataframe[close_col]
+        df['RSI'] = dataframe[rsi_col]
+        df['Date'] = dataframe.index
+
+        fig = plt.figure()
+        left, width = 0.1, 0.8
+        rect1 = [left, 0.4, width, 0.5] # left, bottom, width, height
+        rect2 = [left, 0.1, width, 0.3]
+
+        ax1 = fig.add_axes(rect1)
+        ax2 = fig.add_axes(rect2, sharex=ax1)
+
+        ax1.plot(df.Date, df.Close, color='blue')
+        ax1.set_title(title)
+
+        fillcolor='red'
+        linecolor = 'orange'
+        ax2.plot(df.Date, df.RSI, color=linecolor)
+        ax2.axhline(70, color=fillcolor, linestyle='--')
+        ax2.axhline(30, color=fillcolor, linestyle='--')
+        #ax2.fill_between(df.Date, 100, 70, facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
+        #ax2.fill_between(df.Date, 0, 30, facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
+        ax2.fill_between(df.Date, df.RSI, 70, where=(df.RSI >= 70), facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
+        ax2.fill_between(df.Date, df.RSI, 30, where=(df.RSI <= 30), facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
+        ax2.set_ylim(0, 100)
+        ax2.set_yticks([30, 70])
+        ax2.text(0.025, 0.95, 'RSI (14)', va='top', transform=ax2.transAxes, fontsize=9)
+
+        #ax1 = df.plot(x='Date', y='Close', label='Close Price', color='blue', title=title, zorder=1)
+        #df.plot(ax=ax, x='Date', y='RSI', label='RSI', color='green', zorder=5)
+
+        plt.show()
+
 
 
 

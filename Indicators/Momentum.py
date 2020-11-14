@@ -14,3 +14,8 @@ from ta import momentum
 # Ultimate Oscillator
 # William's %R
 
+class RelativeStrengthIndex:
+    @staticmethod
+    def calculate(ohlc_data, period=14, fill_null = False):
+        indicator_rsi = ta.momentum.rsi(ohlc_data['Close'], period, fill_null)
+        ohlc_data['RSI'] = indicator_rsi
