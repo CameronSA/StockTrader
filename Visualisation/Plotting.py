@@ -64,6 +64,7 @@ class BollingerPlot:
 
         if include_width:
             df.plot(ax=ax, x='Date', y='Band Width', label='Band Width', color='purple', zorder=20)
+            ax.fill_between(df['Date'], df['Band Width'], 0, alpha=0.2, color='purple')
 
         if 1 in set(df['Upper Indicator']):
             df.groupby('Upper Indicator').get_group(1).plot(
@@ -77,6 +78,7 @@ class BollingerPlot:
         ax.fill_between(df['Date'], df['Lower Band'], df['Upper Band'], alpha=0.2, color='orange')
 
         plt.ylabel('Price ($)')
+        plt.grid()
         plt.show()
 
 
@@ -95,25 +97,58 @@ class RSIPlot:
         ax1 = fig.add_axes(rect1)
         ax2 = fig.add_axes(rect2, sharex=ax1)
 
-        ax1.plot(df.Date, df.Close, color='blue')
+        ax1.plot(df.Date, df.Close, color='blue', label='Close Price')
         ax1.set_title(title)
+        ax1.grid()
+        ax1.legend()
 
-        fillcolor='red'
+        fillcolor = 'red'
         linecolor = 'orange'
-        ax2.plot(df.Date, df.RSI, color=linecolor)
+        ax2.plot(df.Date, df.RSI, color=linecolor, label='RSI')
         ax2.axhline(70, color=fillcolor, linestyle='--')
         ax2.axhline(30, color=fillcolor, linestyle='--')
-        #ax2.fill_between(df.Date, 100, 70, facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
-        #ax2.fill_between(df.Date, 0, 30, facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
         ax2.fill_between(df.Date, df.RSI, 70, where=(df.RSI >= 70), facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
         ax2.fill_between(df.Date, df.RSI, 30, where=(df.RSI <= 30), facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
         ax2.set_ylim(0, 100)
         ax2.set_yticks([30, 70])
-        ax2.text(0.025, 0.95, 'RSI (14)', va='top', transform=ax2.transAxes, fontsize=9)
+        ax2.grid()
+        ax2.legend()
 
-        #ax1 = df.plot(x='Date', y='Close', label='Close Price', color='blue', title=title, zorder=1)
-        #df.plot(ax=ax, x='Date', y='RSI', label='RSI', color='green', zorder=5)
+        plt.show()
 
+class MACDPlot:
+    def __init__(self, dataframe, close_col, macd_col, macd_signal_col, macd_diff_col, ema_short_col, ema_long_col, title):
+        df = pd.DataFrame()
+        df['Close'] = dataframe[close_col]
+        df['MACD'] = dataframe[macd_col]
+        df['MACD Signal'] = dataframe[macd_signal_col]
+        df['MACD Diff'] = dataframe[macd_diff_col]
+        df['EMA Short'] = dataframe[ema_short_col]
+        df['EMA Long'] = dataframe[ema_long_col]
+        df['Date'] = dataframe.index
+
+        fig = plt.figure()
+        left, width = 0.1, 0.8
+        rect1 = [left, 0.4, width, 0.5]  # left, bottom, width, height
+        rect2 = [left, 0.1, width, 0.3]
+
+        ax1 = fig.add_axes(rect1)
+        ax2 = fig.add_axes(rect2, sharex=ax1)
+
+        ax1.plot(df.Date, df.Close, color='blue', label='Close Price')
+        ax1.plot(df.Date, df['EMA Short'], color='green', label='Short EMA')
+        ax1.plot(df.Date, df['EMA Long'], color='red', label='Long EMA')
+        ax1.set_title(title)
+        ax1.legend()
+        ax1.grid()
+
+        ax2.plot(df.Date, df.MACD, color='green', label='MACD')
+        ax2.plot(df.Date, df['MACD Signal'], color='red', label='MACD Signal')
+        ax2.plot(df.Date, df['MACD Diff'], color='blue', label='MACD Diff')
+        ax2.fill_between(df.Date, df['MACD Diff'], 0, facecolor='blue', edgecolor='blue', alpha=0.2)
+        ax2.axhline(0, color='black', linestyle='--')
+        ax2.legend()
+        ax2.grid()
         plt.show()
 
 
