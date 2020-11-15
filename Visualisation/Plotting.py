@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
 import mplfinance as mpf
 import pandas as pd
-import datetime
 
 
 class TimeSeriesPlot:
@@ -29,8 +27,6 @@ class TimeSeriesPlot:
                 plot = self.__plots_dict[key]
                 plot[0][plot[1]].plot(ax=ax, label=plot[2], color=plot[3])
 
-        #plt.xticks(rotation=45)
-
         plt.ylabel(y_label)
         plt.legend()
         plt.show()
@@ -46,47 +42,62 @@ class CandleStick:
 
 class BollingerPlot:
     def __init__(self, dataframe, close_col, mavg_col, upper_col,
-                 lower_col, upper_indicator_col, lower_indicator_col, width_col, title, include_width = False):
+                 lower_col, signal_col, width_col, title):
         df = pd.DataFrame()
         df['Close'] = dataframe[close_col]
         df['Moving Average'] = dataframe[mavg_col]
         df['Upper Band'] = dataframe[upper_col]
         df['Lower Band'] = dataframe[lower_col]
-        df['Upper Indicator'] = dataframe[upper_indicator_col]
-        df['Lower Indicator'] = dataframe[lower_indicator_col]
+        df['Signal'] = dataframe[signal_col]
         df['Band Width'] = dataframe[width_col]
         df['Date'] = dataframe.index
 
-        ax = df.plot(x='Date', y='Close', label='Close Price', color='blue', title=title, zorder=1)
-        df.plot(ax=ax, x='Date', y='Moving Average', label='Moving Average', color='green', zorder=5)
-        df.plot(ax=ax, x='Date', y='Upper Band', label='Upper Band', color='orange', zorder=10)
-        df.plot(ax=ax, x='Date', y='Lower Band', label='Lower Band', color='orange', zorder=15)
+        fig = plt.figure()
+        left, width = 0.1, 0.8
+        rect1 = [left, 0.4, width, 0.5]  # left, bottom, width, height
+        rect2 = [left, 0.1, width, 0.3]
 
-        if include_width:
-            df.plot(ax=ax, x='Date', y='Band Width', label='Band Width', color='purple', zorder=20)
-            ax.fill_between(df['Date'], df['Band Width'], 0, alpha=0.2, color='purple')
+        ax1 = fig.add_axes(rect1)
+        ax2 = fig.add_axes(rect2, sharex=ax1)
 
-        if 1 in set(df['Upper Indicator']):
-            df.groupby('Upper Indicator').get_group(1).plot(
-                ax=ax, x='Date', y='Upper Band', label='Sell Signal', color='red', kind='scatter',
+        ax1.plot(df.Date, df.Close, label='Close Price', color='blue', zorder=1)
+        df.plot(ax=ax1, x='Date', y='Moving Average', label='Moving Average', color='green', zorder=5)
+        df.plot(ax=ax1, x='Date', y='Upper Band', label='Upper Band', color='orange', zorder=10)
+        df.plot(ax=ax1, x='Date', y='Lower Band', label='Lower Band', color='orange', zorder=15)
+        if 1 in set(df['Signal']):
+            df.groupby('Signal').get_group(1).plot(
+                ax=ax1, x='Date', y='Lower Band', label='Buy Signal', color='green', kind='scatter',
+                marker='^', s=50, zorder=25)
+
+        if -1 in set(df['Signal']):
+            df.groupby('Signal').get_group(-1).plot(
+                ax=ax1, x='Date', y='Upper Band', label='Sell Signal', color='red', kind='scatter',
                 marker='v', s=50, zorder=25)
-        if 1 in set(df['Lower Indicator']):
-            df.groupby('Lower Indicator').get_group(1).plot(
-                ax=ax, x='Date', y='Lower Band', label='Buy Signal', color='green', kind='scatter',
-                marker='^', s=50, zorder=30)
 
-        ax.fill_between(df['Date'], df['Lower Band'], df['Upper Band'], alpha=0.2, color='orange')
+        ax1.fill_between(df['Date'], df['Lower Band'], df['Upper Band'], alpha=0.2, color='orange')
+        ax1.set_ylabel('Price ($)')
+        ax1.set_xlabel('')
+        ax1.set_xticks([])
+        ax1.set_title(title)
+        ax1.legend()
 
-        plt.ylabel('Price ($)')
+        ax2.plot(df.Date, df['Band Width'], label='Band Width', color='purple')
+        ax2.fill_between(df['Date'], df['Band Width'], 0, alpha=0.2, color='purple')
+
+        ax2.set_ylabel('Band Width ($)')
+        ax2.set_xlabel('')
         plt.grid()
+        plt.xticks(rotation=15)
         plt.show()
 
 
 class RSIPlot:
-    def __init__(self, dataframe, close_col, rsi_col, title):
+    def __init__(self, dataframe, close_col, rsi_col, signal_col, strong_signal_col, title):
         df = pd.DataFrame()
         df['Close'] = dataframe[close_col]
         df['RSI'] = dataframe[rsi_col]
+        df['Signal'] = dataframe[signal_col]
+        df['Strong Signal'] = dataframe[strong_signal_col]
         df['Date'] = dataframe.index
 
         fig = plt.figure()
@@ -101,30 +112,63 @@ class RSIPlot:
         ax1.set_title(title)
         ax1.grid()
         ax1.legend()
+        ax1.set_ylabel('Price ($)')
+        ax1.set_xlabel('')
+        ax1.set_xticks([])
 
-        fillcolor = 'red'
+        fillcolor = 'salmon'
+        secondary_fillcolor = 'red'
         linecolor = 'orange'
         ax2.plot(df.Date, df.RSI, color=linecolor, label='RSI')
+
+        if 1 in set(df['Signal']):
+            df.groupby('Signal').get_group(1).plot(
+                ax=ax2, x='Date', y='RSI', label='Buy Signal', color='green', kind='scatter',
+                marker='^', s=50, zorder=25)
+
+        if -1 in set(df['Signal']):
+            df.groupby('Signal').get_group(-1).plot(
+                ax=ax2, x='Date', y='RSI', label='Sell Signal', color='red', kind='scatter',
+                marker='v', s=50, zorder=25)
+
+        if 1 in set(df['Strong Signal']):
+            df.groupby('Strong Signal').get_group(1).plot(
+                ax=ax2, x='Date', y='RSI', label='Strong Buy Signal', color='green', kind='scatter',
+                marker='^', s=100, zorder=25)
+
+        if -1 in set(df['Strong Signal']):
+            df.groupby('Strong Signal').get_group(-1).plot(
+                ax=ax2, x='Date', y='RSI', label='Strong Sell Signal', color='red', kind='scatter',
+                marker='v', s=100, zorder=25)
+
         ax2.axhline(70, color=fillcolor, linestyle='--')
         ax2.axhline(30, color=fillcolor, linestyle='--')
+        ax2.axhline(80, color=secondary_fillcolor, linestyle='--')
+        ax2.axhline(20, color=secondary_fillcolor, linestyle='--')
         ax2.fill_between(df.Date, df.RSI, 70, where=(df.RSI >= 70), facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
         ax2.fill_between(df.Date, df.RSI, 30, where=(df.RSI <= 30), facecolor=fillcolor, edgecolor=fillcolor, alpha=0.2)
         ax2.set_ylim(0, 100)
-        ax2.set_yticks([30, 70])
+        ax2.set_yticks([20, 30, 70, 80])
         ax2.grid()
         ax2.legend()
+        ax2.set_ylabel('RSI')
+        ax2.set_xlabel('')
 
+        plt.xticks(rotation=15)
         plt.show()
 
 class MACDPlot:
-    def __init__(self, dataframe, close_col, macd_col, macd_signal_col, macd_diff_col, ema_short_col, ema_long_col, title):
+    def __init__(self, dataframe, close_col, macd_col, macd_ema_col, macd_diff_col, macd_sig_col,
+                 ema_short_col, ema_long_col, ema_sig_col, title):
         df = pd.DataFrame()
         df['Close'] = dataframe[close_col]
         df['MACD'] = dataframe[macd_col]
-        df['MACD Signal'] = dataframe[macd_signal_col]
+        df['MACD EMA'] = dataframe[macd_ema_col]
         df['MACD Diff'] = dataframe[macd_diff_col]
+        df['MACD Signal'] = dataframe[macd_sig_col]
         df['EMA Short'] = dataframe[ema_short_col]
         df['EMA Long'] = dataframe[ema_long_col]
+        df['EMA Signal'] = dataframe[ema_sig_col]
         df['Date'] = dataframe.index
 
         fig = plt.figure()
@@ -138,18 +182,53 @@ class MACDPlot:
         ax1.plot(df.Date, df.Close, color='blue', label='Close Price')
         ax1.plot(df.Date, df['EMA Short'], color='green', label='Short EMA')
         ax1.plot(df.Date, df['EMA Long'], color='red', label='Long EMA')
+
+        if 1 in set(df['EMA Signal']):
+            df.groupby('EMA Signal').get_group(1).plot(
+                ax=ax1, x='Date', y='EMA Long', label='Buy Signal', color='green', kind='scatter',
+                marker='^', s=50, zorder=25)
+
+        if -1 in set(df['EMA Signal']):
+            df.groupby('EMA Signal').get_group(-1).plot(
+                ax=ax1, x='Date', y='EMA Long', label='Sell Signal', color='red', kind='scatter',
+                marker='v', s=50, zorder=25)
+
         ax1.set_title(title)
         ax1.legend()
         ax1.grid()
+        ax1.set_ylabel('Price ($)')
+        ax1.set_xlabel('')
+        ax1.set_xticks([])
 
         ax2.plot(df.Date, df.MACD, color='green', label='MACD')
-        ax2.plot(df.Date, df['MACD Signal'], color='red', label='MACD Signal')
+        ax2.plot(df.Date, df['MACD EMA'], color='red', label='MACD Signal')
         ax2.plot(df.Date, df['MACD Diff'], color='blue', label='MACD Diff')
+
+        if 1 in set(df['MACD Signal']):
+            df.groupby('MACD Signal').get_group(1).plot(
+                ax=ax2, x='Date', y='MACD Diff', label='Buy Signal', color='green', kind='scatter',
+                marker='^', s=50, zorder=25)
+
+        if -1 in set(df['MACD Signal']):
+            df.groupby('MACD Signal').get_group(-1).plot(
+                ax=ax2, x='Date', y='MACD Diff', label='Sell Signal', color='red', kind='scatter',
+                marker='v', s=50, zorder=25)
+
         ax2.fill_between(df.Date, df['MACD Diff'], 0, facecolor='blue', edgecolor='blue', alpha=0.2)
         ax2.axhline(0, color='black', linestyle='--')
         ax2.legend()
         ax2.grid()
+        ax2.set_ylabel('MACD')
+        ax2.set_xlabel('')
+        plt.xticks(rotation=15)
         plt.show()
+
+class Histogram:
+    def __init__(self, list, label):
+        plt.hist(list, bins='rice', label=label)
+        plt.legend()
+        plt.show()
+
 
 
 
