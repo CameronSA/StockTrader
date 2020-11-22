@@ -229,7 +229,46 @@ class Histogram:
         plt.legend()
         plt.show()
 
+class Derivative:
+    def __init__(self, dataframe, y_col, dydx_col, dydx_ma_col, title):
+        df = pd.DataFrame()
+        df['y'] = dataframe[y_col]
+        df['dydx'] = dataframe[dydx_col]
+        df['dydx_ma'] = dataframe[dydx_ma_col]
+        df['Date'] = dataframe.index
 
+        fig = plt.figure()
+        left, width = 0.1, 0.8
+        rect1 = [left, 0.7, width, 0.3]  # left, bottom, width, height
+        rect2 = [left, 0.4, width, 0.3]
+        rect3 = [left, 0.1, width, 0.3]
+
+        ax1 = fig.add_axes(rect1)
+        ax2 = fig.add_axes(rect2, sharex=ax1)
+        ax3 = fig.add_axes(rect3, sharex=ax1)
+
+        ax1.plot(df.Date, df.y, color='blue', label='Data')
+        ax1.set_title(title)
+        ax1.grid()
+        ax1.legend()
+        ax1.set_ylabel('')
+        ax1.set_xlabel('')
+        ax1.set_xticks([])
+
+        ax2.plot(df.Date, df.dydx, color='green', label='Time Derivative')
+        ax2.grid()
+        ax2.legend()
+        ax2.set_ylabel('')
+        ax2.set_xlabel('')
+
+        ax3.plot(df.Date, df.dydx_ma, color='red', label='Time Derivative MA')
+        ax3.grid()
+        ax3.legend()
+        ax3.set_ylabel('')
+        ax3.set_xlabel('')
+
+        plt.xticks(rotation=15)
+        plt.show()
 
 
 

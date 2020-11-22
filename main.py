@@ -9,21 +9,28 @@ from Portfolio.TickerAnalysis import TickerAnalysis
 import Visualisation.Plotting as plotting
 
 def main():
-    ticker = 'AMZN'
-    ohlc_data = yahoo.StockTimeSeries.historical_data(ticker, '10y', '1d')
+    ticker = 'MMM'
+    ohlc_data = yahoo.StockTimeSeries.historical_data(ticker, '2y', '1d')
     apply.apply_indicators(ohlc_data)
     close_data = ohlc_data.drop(columns=['Open', 'High', 'Low', 'Volume', 'Dividends', 'Stock Splits'])
-    tckr = TickerAnalysis(ticker, '2y', '1d')
-    returns_dict = tckr.calculate_returns()
-    print(returns_dict)
+    tckr = TickerAnalysis('20y', '1d')
+    trend_analysis_dict = tckr.trend_analysis('snp500', ma_period=100)
+    plotting.Derivative(trend_analysis_dict[ticker], 'MA', 'dMA', 'dMA_MA', f'{ticker} Moving Average Derivative')
 
-    plotting.RSIPlot(close_data, 'Close', 'rsi', 'rsi_signal', 'strong_rsi_signal', f'{ticker} RSI')
-    plotting.Histogram(returns_dict['returns_data'], f'{ticker} % returns')
+    plotting.Histogram(trend_analysis_dict[ticker]['MA'], f'{ticker} Moving Average Distribution')
+    plotting.Histogram(trend_analysis_dict[ticker]['dMA'], f'{ticker} Moving Average Time Derivative Distribution')
+    plotting.Histogram(
+        trend_analysis_dict[ticker]['dMA_MA'], f'{ticker} Moving Average Time Derivative Distribution Moving Average')
+
+    # returns = tckr.calculate_returns()
+    # print(returns)
+    # plotting.Histogram(returns['returns_data'], f'{ticker} % returns')
+
+    # plotting.RSIPlot(close_data, 'Close', 'rsi', 'rsi_signal', 'strong_rsi_signal', f'{ticker} RSI')
     # plotting.BollingerPlot(close_data, 'Close', 'bb_mavg', 'bb_upper', 'bb_lower',
     #                        'bb_signal', 'bb_width', f'{ticker} Bollinger Bands')
     # plotting.MACDPlot(close_data, 'Close', 'macd', 'macd_ema', 'macd_diff', 'macd_signal',
     #                               'ema_short', 'ema_long', 'ema_signal', f'{ticker} EMA and MACD')
-
 
 if __name__ == '__main__':
     main()
