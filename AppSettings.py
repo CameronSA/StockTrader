@@ -1,0 +1,2 @@
+SNP500_STOCK_LISTINGS_PATH = 'Files/StockListings/SNP500_Listings_2020-11-22.csv'
+SNP500_TRACKED_SECURITIES_PATH = 'Files/SNP500/SNP500_Tracked_Securities.csv'

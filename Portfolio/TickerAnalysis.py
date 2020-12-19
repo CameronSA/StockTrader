@@ -2,25 +2,34 @@ import API.YahooFinance as yahoo
 import pandas as pd
 import numpy as np
 from scipy.optimize import curve_fit
-import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
 import time
+from AppSettings import *
 
 
 class TickerAnalysis:
-    def __init__(self, time_period, interval):
+    def __init__(self, time_period, interval, stock_exchange):
         self.__interval = interval
         self.__time_period = time_period
+        if stock_exchange == 'snp500':
+            self.__stock_exchange = stock_exchange
+            self.__stock_listings = pd.read_csv(SNP500_STOCK_LISTINGS_PATH)
+
+    @property
+    def stock_exchange(self):
+        return self.__stock_exchange
+
+    @property
+    def stock_listings(self):
+        return self.__stock_listings
 
     def trend_analysis(self, stock_exchange, ma_period):
         print(f'Performing trend analysis for {stock_exchange}. . .')
         time.sleep(0.05)
-        self.__set_stock_exchange(stock_exchange)
-        trend_derivative_analysis_dict = {}
         trend_gradient_analysis_dict = {}
         # count = 0
-        for ticker in tqdm(self.__stock_listings['Symbol']):
+        for ticker in tqdm(self.stock_listings['Symbol']):
             # if count >= 20:
             #     break
             self.__trend_gradient_analysis(trend_gradient_analysis_dict, ticker, ma_period)
@@ -93,10 +102,6 @@ class TickerAnalysis:
 
         return average_rankings_dict
 
-    def __set_stock_exchange(self, stock_exchange):
-        if stock_exchange == 'snp500':
-            self.__stock_listings = pd.read_csv('StockListings/SNP500_Listings_2020-11-22.csv')
-
     def __straight_line(self, x, m, c):
         return m*x + c
 
@@ -105,7 +110,7 @@ class TickerAnalysis:
         try:
             ohlc_data = yahoo.StockTimeSeries.historical_data(ticker, self.__time_period, self.__interval)
         except Exception as e:
-            print(f'Error encountered for ticker: {ticker}: ', e)
+            print(f'- Error encountered for ticker: {ticker}: ', e)
         if not ohlc_data.empty:
             analysed_data = pd.DataFrame()
             analysed_data['MA'] = ohlc_data['Close'].rolling(window=ma_period).mean().dropna()
@@ -125,4 +130,4 @@ class TickerAnalysis:
                 else:
                     print(f'WARNING: Duplicate tickers found: {ticker}')
             except Exception as e:
-                print(f'Error encountered for ticker {ticker}', e)
+                print(f'- Error encountered for ticker {ticker}', e)
