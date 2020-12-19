@@ -3,13 +3,19 @@ from AppSettings import *
 import pandas as pd
 from Objects.Security import Security
 from Objects.Strategy import Strategy
+from Objects.StockExchanges import StockExchanges
+from Finance.FinancialActions import FinancialActions
 from Portfolio.Strategies.LongTermStrategy import LongTermStrategy
+from Objects.Actions import Actions
+
 
 class PortfolioManager:
-    def __init__(self, stock_exchange):
+    def __init__(self, stock_exchange, long_term_percentage_cash_out_limit, bank):
         self.__stock_exchange = stock_exchange
         self.__stock_listings = TickerAnalysis('', '', stock_exchange).stock_listings
-        if stock_exchange == 'snp500':
+        self.__long_term_percentage_cash_out_limit = long_term_percentage_cash_out_limit
+        self.__bank = bank
+        if stock_exchange == StockExchanges.SNP_500:
             self.__tracked_securities_path = SNP500_TRACKED_SECURITIES_PATH
 
         try:
@@ -18,7 +24,19 @@ class PortfolioManager:
         except Exception as e:
             print(e)
             self.__tracked_securities = []
+        self.__updated_securities = []
 
+    @property
+    def bank(self):
+        return self.__bank
+
+    @property
+    def updated_securities(self):
+        return self.__updated_securities
+
+    @property
+    def long_term_percentage_cash_out_limit(self):
+        return self.__long_term_percentage_cash_out_limit
 
     @property
     def stock_exchange(self):
@@ -47,7 +65,29 @@ class PortfolioManager:
     def process_tracked_securities(self):
         for security in self.tracked_securities:
             if security.strategy == Strategy.long_term:
-                pass
+                long_term_strategy = LongTermStrategy(self.long_term_percentage_cash_out_limit, self.stock_exchange)
+                action = long_term_strategy.analyse_security()
+                if action == Actions.hold:
+                    self.__updated_securities.append(security)
+                elif action == Actions.sell:
+                    self.sell_security(security)
+                else:
+                    raise Exception("Invalid action received from security analysis")
+            else:
+                self.__updated_securities.append(security)
 
+    def buy_security(self, ticker, strategy):
+        buy_price = FinancialActions.buy(ticker)
+        security = Security(self.stock_exchange, ticker, buy_price, strategy)
+        self.__bank.buy_transaction(security.buy_price, f"BUY: {ticker}")
+        self.__updated_securities.append(security)
 
+    def sell_security(self, security):
+        sell_price = FinancialActions.sell(security.ticker)
+        self.__bank.sell_transaction(sell_price, f"SELL: {security.ticker}")
 
+    def save_securities(self):
+        with open(self.tracked_securities_path, 'w') as output_file:
+            output_file.write('stock_exchange,ticker,buy_price,strategy\n')
+            for security in self.tracked_securities:
+                output_file.write(f'{security.stock_exchange, security.ticker, security.buy_price, security.strategy}')

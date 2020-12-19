@@ -1,43 +1,24 @@
-#import API.AlphaVantageConnection as avc
-import API.YahooFinance as yahoo
-import Indicators.Volatility as volatility
-import Indicators.Momentum as momentum
-import Indicators.Trend as trend
-import Indicators.ApplyIndicators as apply
-from Portfolio.TickerAnalysis import TickerAnalysis
+from Portfolio.PortfolioManager import PortfolioManager
+from Portfolio.Strategies.LongTermStrategy import LongTermStrategy
+from Objects.StockExchanges import StockExchanges
+from Finance.Bank import Bank
 
-import Visualisation.Plotting as plotting
 
 def main():
+    bank = Bank(1000)
+    percentage_cash_out_limit = 1
+    portfolio = PortfolioManager(StockExchanges.SNP_500, percentage_cash_out_limit, bank)
+    portfolio.process_tracked_securities()
+    get_new_securities(portfolio, percentage_cash_out_limit)
 
 
-    #ticker = 'MMM'
-    #ohlc_data = yahoo.StockTimeSeries.historical_data(ticker, '2y', '1d')
-    #apply.apply_indicators(ohlc_data)
-    #close_data = ohlc_data.drop(columns=['Open', 'High', 'Low', 'Volume', 'Dividends', 'Stock Splits'])
+def get_new_securities(portfolio, percentage_cash_out_limit):
+    long_term_strategy = LongTermStrategy(percentage_cash_out_limit, StockExchanges.SNP_500)
+    tickers_to_buy = long_term_strategy.analyse_stock_exchange()
 
-    # tckr = TickerAnalysis('5y', '1d')
-    # trend_gradient_analysis_dict = tckr.trend_analysis('snp500', ma_period=100)
-    # ranked_tickers = tckr.rank_by_trend(trend_gradient_analysis_dict, 1000)
+    for ticker in tickers_to_buy:
+        portfolio.buy_security(ticker)
 
-    # count = 0
-    # for ticker in ranked_tickers:
-    #     if count % 20 == 0:
-    #         ohlc_data = yahoo.StockTimeSeries.historical_data(ticker, '5y', '1d')
-    #         ts_plot = plotting.TimeSeriesPlot()
-    #         ts_plot.add_series(ohlc_data, 'Close', 'Close Price', 'blue')
-    #         ts_plot.draw('Price ($)', ticker)
-    #     count += 1
-
-    # returns = tckr.calculate_returns()
-    # print(returns)
-    # plotting.Histogram(returns['returns_data'], f'{ticker} % returns')
-
-    # plotting.RSIPlot(close_data, 'Close', 'rsi', 'rsi_signal', 'strong_rsi_signal', f'{ticker} RSI')
-    # plotting.BollingerPlot(close_data, 'Close', 'bb_mavg', 'bb_upper', 'bb_lower',
-    #                        'bb_signal', 'bb_width', f'{ticker} Bollinger Bands')
-    # plotting.MACDPlot(close_data, 'Close', 'macd', 'macd_ema', 'macd_diff', 'macd_signal',
-    #                               'ema_short', 'ema_long', 'ema_signal', f'{ticker} EMA and MACD')
 
 if __name__ == '__main__':
     main()
