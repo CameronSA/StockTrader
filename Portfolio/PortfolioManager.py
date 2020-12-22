@@ -58,7 +58,8 @@ class PortfolioManager:
     def __df_to_securities(tracked_securities_df):
         securities = []
         for index, row in tracked_securities_df.iterrows():
-            security = Security(row['stock_exchange'], row['ticker'], row['buy_price'], row['strategy'])
+            security = Security(row['stock_exchange'], row['ticker'], row['number_bought'],
+                                row['buy_price'], row['strategy'])
             securities.append(security)
         return securities
 
@@ -88,6 +89,8 @@ class PortfolioManager:
 
     def save_securities(self):
         with open(self.tracked_securities_path, 'w') as output_file:
-            output_file.write('stock_exchange,ticker,buy_price,strategy\n')
+            output_file.write('stock_exchange,ticker,number_bought,buy_price,strategy\n')
             for security in self.tracked_securities:
-                output_file.write(f'{security.stock_exchange, security.ticker, security.buy_price, security.strategy}')
+                line_to_write = f'{security.stock_exchange}, {security.ticker}, {security.number_bought}, ' \
+                                f'{security.buy_price}, {security.strategy}'
+                output_file.write(line_to_write)
