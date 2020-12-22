@@ -6,3 +6,4 @@ class StockTimeSeries:
     def historical_data(ticker, period, interval):
         tckr = yf.Ticker(ticker)
         return tckr.history(period=period, interval=interval)
+

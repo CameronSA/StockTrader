@@ -24,8 +24,8 @@ class TickerAnalysis:
     def stock_listings(self):
         return self.__stock_listings
 
-    def trend_analysis(self, stock_exchange, ma_period):
-        print(f'Performing trend analysis for {stock_exchange}. . .')
+    def trend_analysis(self, ma_period):
+        print(f'Performing trend analysis for {self.stock_exchange}. . .')
         time.sleep(0.05)
         trend_gradient_analysis_dict = {}
         # count = 0
@@ -36,7 +36,7 @@ class TickerAnalysis:
             # count += 1
         return trend_gradient_analysis_dict
 
-    def rank_by_trend(self, trend_gradient_analysis_dict, n_trials):
+    def rank_by_long_term_increasing(self, trend_gradient_analysis_dict, n_trials):
         tickers = []
         trend_gradients = []
         trend_gradient_errors = []

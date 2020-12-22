@@ -77,20 +77,20 @@ class PortfolioManager:
             else:
                 self.__updated_securities.append(security)
 
-    def buy_security(self, ticker, strategy):
-        buy_price = FinancialActions.buy(ticker)
-        security = Security(self.stock_exchange, ticker, buy_price, strategy)
-        self.__bank.buy_transaction(security.buy_price, f"BUY: {ticker}")
+    def buy_security(self, ticker, number, strategy):
+        buy_price = FinancialActions.buy(ticker, number)
+        security = Security(self.stock_exchange, ticker, number, buy_price, strategy)
+        self.__bank.buy_transaction(number, security.buy_price, f"BUY: {ticker}")
         self.__updated_securities.append(security)
 
     def sell_security(self, security):
-        sell_price = FinancialActions.sell(security.ticker)
-        self.__bank.sell_transaction(sell_price, f"SELL: {security.ticker}")
+        sell_price = FinancialActions.sell(security.ticker, security.number_bought)
+        self.__bank.sell_transaction(security.number_bought, sell_price, f"SELL: {security.ticker}")
 
     def save_securities(self):
         with open(self.tracked_securities_path, 'w') as output_file:
             output_file.write('stock_exchange,ticker,number_bought,buy_price,strategy\n')
-            for security in self.tracked_securities:
+            for security in self.updated_securities:
                 line_to_write = f'{security.stock_exchange}, {security.ticker}, {security.number_bought}, ' \
                                 f'{security.buy_price}, {security.strategy}'
                 output_file.write(line_to_write)

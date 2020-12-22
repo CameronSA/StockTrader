@@ -10,12 +10,12 @@ class Bank:
     def current_balance(self):
         return self.__current_balance
 
-    def buy_transaction(self, price, reference):
+    def buy_transaction(self, number, price, action):
         self.__current_balance -= price
-        print("Reference", "Amount", "Resulting Balance")
-        print(reference, f'-{price}', self.current_balance())
+        print("Action", "Number", "Amount", "Resulting Balance")
+        print(action, number, f'-{price}', self.current_balance())
 
-    def sell_transaction(self, price, reference):
+    def sell_transaction(self, number, price, action):
         self.__current_balance += price
-        print("Reference", "Amount", "Resulting Balance")
-        print(reference, price, self.current_balance())
+        print("Action", "Number", "Amount", "Resulting Balance")
+        print(action, number, price, self.current_balance())
