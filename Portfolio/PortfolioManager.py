@@ -1,4 +1,4 @@
-from Portfolio.TickerAnalysis import TickerAnalysis
+from Portfolio.TickerStatisticalAnalysis import TickerAnalysis
 from AppSettings import *
 import pandas as pd
 from Objects.Security import Security
@@ -10,10 +10,9 @@ from Objects.Actions import Actions
 
 
 class PortfolioManager:
-    def __init__(self, stock_exchange, long_term_percentage_cash_out_limit, bank):
+    def __init__(self, stock_exchange, bank):
         self.__stock_exchange = stock_exchange
         self.__stock_listings = TickerAnalysis('', '', stock_exchange).stock_listings
-        self.__long_term_percentage_cash_out_limit = long_term_percentage_cash_out_limit
         self.__bank = bank
         if stock_exchange == StockExchanges.SNP_500:
             self.__tracked_securities_path = SNP500_TRACKED_SECURITIES_PATH
@@ -33,10 +32,6 @@ class PortfolioManager:
     @property
     def updated_securities(self):
         return self.__updated_securities
-
-    @property
-    def long_term_percentage_cash_out_limit(self):
-        return self.__long_term_percentage_cash_out_limit
 
     @property
     def stock_exchange(self):
@@ -63,10 +58,10 @@ class PortfolioManager:
             securities.append(security)
         return securities
 
-    def process_tracked_securities(self):
+    def process_tracked_securities(self, time_period, interval):
         for security in self.tracked_securities:
             if security.strategy == Strategy.long_term:
-                long_term_strategy = LongTermStrategy(self.long_term_percentage_cash_out_limit, self.stock_exchange)
+                long_term_strategy = LongTermStrategy(self.stock_exchange, time_period, interval)
                 action = long_term_strategy.analyse_security()
                 if action == Actions.hold:
                     self.__updated_securities.append(security)
