@@ -10,5 +10,5 @@ class StockTimeSeries:
     @staticmethod
     def historical_data_timespan(ticker, start_time, end_time, interval):
         tckr = yf.Ticker(ticker)
-        return tckr.history(interval=interval, start_time=start_time, end_time=end_time)
+        return tckr.history(start=start_time, end=end_time, interval=interval)
 

@@ -13,7 +13,7 @@ def main():
 
 def test_long_term_increasing_sim():
     from Simulation.LongTermIncreasingSimulation import LongTermIncreasingSimulation
-    sim = LongTermIncreasingSimulation('MSFT', 1, 365, datetime(2000, 1, 1), datetime(2019, 12, 31))
+    sim = LongTermIncreasingSimulation('AMZN', 1, 365, datetime(2000, 1, 1), datetime(2019, 12, 31))
     sim.calculate_average_returns()
 
 
