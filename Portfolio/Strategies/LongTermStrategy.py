@@ -49,7 +49,7 @@ class LongTermStrategy:
             return_values.append(percentage_return[1])
 
         average_return = np.mean(return_values)
-        stddev_return = np.stddev(return_values)
+        stddev_return = np.std(return_values)
         print(f'\nAverage return = {average_return} +/- {stddev_return}')
 
         threshold_return = average_return
