@@ -6,15 +6,15 @@ from tqdm import tqdm
 from datetime import datetime
 import time
 from AppSettings import *
+from Objects.StockExchanges import StockExchanges
 
 
-class TickerAnalysis:
+class TickerStatisticalAnalysis:
     def __init__(self, time_period, interval, stock_exchange):
         self.__interval = interval
         self.__time_period = time_period
-        if stock_exchange == 'snp500':
-            self.__stock_exchange = stock_exchange
-            self.__stock_listings = pd.read_csv(SNP500_STOCK_LISTINGS_PATH)
+        self.__stock_exchange = stock_exchange
+        self.__stock_listings = pd.read_csv(SNP500_STOCK_LISTINGS_PATH)
 
     @property
     def stock_exchange(self):

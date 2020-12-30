@@ -1,4 +1,4 @@
-from Portfolio.TickerStatisticalAnalysis import TickerAnalysis
+from Portfolio.TickerStatisticalAnalysis import TickerStatisticalAnalysis
 from AppSettings import *
 import pandas as pd
 from Objects.Security import Security
@@ -12,9 +12,9 @@ from Objects.Actions import Actions
 class PortfolioManager:
     def __init__(self, stock_exchange, bank):
         self.__stock_exchange = stock_exchange
-        self.__stock_listings = TickerAnalysis('', '', stock_exchange).stock_listings
+        self.__stock_listings = TickerStatisticalAnalysis('', '', stock_exchange).stock_listings
         self.__bank = bank
-        if stock_exchange == StockExchanges.SNP_500:
+        if stock_exchange == StockExchanges().SNP_500:
             self.__tracked_securities_path = SNP500_TRACKED_SECURITIES_PATH
 
         try:
@@ -60,12 +60,12 @@ class PortfolioManager:
 
     def process_tracked_securities(self, time_period, interval):
         for security in self.tracked_securities:
-            if security.strategy == Strategy.long_term:
+            if security.strategy == Strategy().long_term_increasing:
                 long_term_strategy = LongTermStrategy(self.stock_exchange, time_period, interval)
                 action = long_term_strategy.analyse_security()
-                if action == Actions.hold:
+                if action == Actions().hold:
                     self.__updated_securities.append(security)
-                elif action == Actions.sell:
+                elif action == Actions().sell:
                     self.sell_security(security)
                 else:
                     raise Exception("Invalid action received from security analysis")

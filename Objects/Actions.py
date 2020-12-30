@@ -1,12 +1,17 @@
 class Actions:
+    def __init__(self):
+        self.__buy = 'buy'
+        self.__sell = 'sell'
+        self.__hold = 'hold'
+
     @property
     def buy(self):
-        return 'buy'
+        return self.__buy
 
     @property
     def sell(self):
-        return 'sell'
+        return self.__sell
 
     @property
     def hold(self):
-        return 'hold'
+        return self.__hold
